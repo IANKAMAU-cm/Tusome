@@ -1,0 +1,52 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Instructor Dashboard{% endblock %}
+
+{% block content %}
+<h2>Welcome, {{ user.username }}!</h2>
+<p>This is your instructor dashboard.</p>
+
+<!-- Add instructor-specific content here, such as course management, creating quizzes, etc. -->
+<!--Sections -->
+<div class="row">
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-header">Manage Courses</div>
+            <div class="card-body">
+                <ul class="list-group">
+                    <!-- Example Courses -->
+                    <li class="list-group-item">Course 1</li>
+                    <li class="list-group-item">Course 2</li>
+                </ul>
+                <a href="#" class="btn btn-primary mt-3">Add New Course</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-header">Create Quizzes</div>
+            <div class="card-body">
+                <ul class="list-group">
+                    <!-- Example Quizzes -->
+                    <li class="list-group-item">Quiz 1</li>
+                    <li class="list-group-item">Quiz 2</li>
+                </ul>
+                <a href="#" class="btn btn-primary mt-3">Create New Quiz</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-header">Latest Notices</div>
+            <div class="card-body">
+                <ul class="list-group">
+                    <!-- Example Notices -->
+                    <li class="list-group-item">New assignment guidelines.</li>
+                    <li class="list-group-item">Upcoming training session.</li>
+                </ul>
+                <a href="#" class="btn btn-primary mt-3">View All</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

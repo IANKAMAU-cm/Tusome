@@ -1,0 +1,15 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Welcome to LMS{% endblock %}
+
+{% block content %}
+<div class="text-center">
+    <h1>Welcome to the Learning Management System</h1>
+    <p class="lead">Empowering students and instructors to achieve their educational goals.</p>
+    {% if not user.is_authenticated %}
+        <a href="{% url 'login' %}" class="btn btn-primary me-2">Login</a>
+        <a href="{% url 'student_register' %}" class="btn btn-secondary">Register as Student</a>
+        <a href="{% url 'instructor_register' %}" class="btn btn-secondary">Register as Instructor</a>
+    {% endif %}
+</div>
+{% endblock %}
