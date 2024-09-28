@@ -26,6 +26,13 @@ class InstructorSignUpForm(UserCreationForm):
             user.save()
         return user
     
+
+class AdminUserCreationForm(UserCreationForm):
+    class Meta:
+        model = CustomUser
+        fields = ('username', 'password1', 'password2')
+
+    
 class CustomAuthenticationForm(AuthenticationForm):
     username = forms.CharField(label='Username', max_length=254, widget=forms.TextInput(attrs={'class': 'form-control'}))
     password = forms.CharField(label='Password', widget=forms.PasswordInput(attrs={'class': 'form-control'}))

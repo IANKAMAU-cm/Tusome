@@ -1,8 +1,9 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required
-from .forms import StudentSignUpForm, InstructorSignUpForm, CustomAuthenticationForm
+from .forms import StudentSignUpForm, InstructorSignUpForm, CustomAuthenticationForm, AdminUserCreationForm, UserCreationForm
 from django.contrib import messages
+from django.contrib.auth.models import User
 
 # Create your views here.
 def home(request):
@@ -62,6 +63,23 @@ def user_login(request):
     else:
         form = CustomAuthenticationForm()
     return render(request, 'core/login.html', {'form': form})
+
+@login_required
+def register_admin(request):
+    if not request.user.is_superuser:
+        return redirect('admin_dashboard')  # Redirect if not admin
+    if request.method == 'POST':
+        form = AdminUserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            user.is_superuser = True  # Make the user an admin
+            user.is_staff = True  # Allow admin access
+            user.save()
+            messages.success(request, 'Admin user created successfully!')
+            return redirect('admin_dashboard')  # Redirect to admin dashboard or any desired page
+    else:
+        form = AdminUserCreationForm()
+    return render(request, 'admin/register_admin.html', {'form': form})
 
 @login_required
 def user_logout(request):

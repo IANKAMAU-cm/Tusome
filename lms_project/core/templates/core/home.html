@@ -1,10 +1,10 @@
 {% extends 'core/base.html' %}
 
-{% block title %}Welcome to LMS{% endblock %}
+{% block title %}Welcome to Tusome{% endblock %}
 
 {% block content %}
 <div class="text-center">
-    <h1>Welcome to the Learning Management System</h1>
+    <h1>Welcome to Tusome</h1>
     <p class="lead">Empowering students and instructors to achieve their educational goals.</p>
     {% if not user.is_authenticated %}
         <a href="{% url 'login' %}" class="btn btn-primary me-2">Login</a>
