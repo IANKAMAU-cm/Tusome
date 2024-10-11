@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <h1 class="mt-4">Admin Dashboard</h1>
+    <p class="lead">Welcome, <strong>{{ current_user.username }}</strong>!</p>
+
+    <!-- Admin Navigation -->
+    <nav class="nav flex-column mb-4">
+        <a class="nav-link" href="{{ url_for('manage_users') }}">Manage Users</a>
+        <a class="nav-link" href="{{ url_for('manage_courses') }}">Manage Courses</a>
+        <a class="nav-link" href="{{ url_for('view_enrollments') }}">View Enrollments</a>
+        <a class="nav-link" href="{{ url_for('view_submissions') }}">View Submissions</a>
+        <a class="nav-link" href="{{ url_for('view_reports') }}">View Reports</a>
+        <!-- Add more admin functionalities as needed -->
+    </nav>
+
+    <!-- Logout Button -->
+    <a href="{{ url_for('logout') }}" class="btn btn-danger">Logout</a>
+</div>
+{% endblock %}

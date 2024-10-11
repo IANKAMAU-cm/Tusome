@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <h1 class="my-4">Student Dashboard</h1>
+    
+    <!-- Welcome Message -->
+    <div class="alert alert-info">
+        <strong>Welcome, {{ current_user.username }}!</strong>
+    </div>
+
+    <!-- Flash messages for notifications or errors -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="alert alert-dismissible">
+          {% for category, message in messages %}
+            <div class="alert alert-{{ category }}">
+              {{ message }}
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <!-- Student Features Section -->
+    <div class="mt-4">
+      <a href="{{ url_for('browse_courses') }}" class="btn btn-primary">Browse Available Courses</a>
+    </div>
+  
+    <div class="mt-4">
+      <h3>My Enrolled Courses</h3>
+      {% if courses %}
+        <ul class="list-group">
+          {% for course in courses %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+              <span>{{ course.title }}</span>
+              <a href="{{ url_for('course_details', course_id=course.id) }}" class="btn btn-secondary btn-sm">View Details</a>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p>You are not enrolled in any courses yet.</p>
+      {% endif %}
+    </div>
+
+    <!-- Add more student functionalities as needed -->
+</div>
+{% endblock %}

@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <h2>Materials for {{ course.title }}</h2>
+  <ul>
+    {% for material in materials %}
+      <li>
+        <a href="{{ url_for('static', filename='uploads/' + material.filename) }}">{{ material.filename }}</a> (Uploaded on {{ material.upload_date }})
+      </li>
+    {% endfor %}
+  </ul>
+{% endblock %}

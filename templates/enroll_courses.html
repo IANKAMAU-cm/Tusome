@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-5">
+    <h2>Enroll in a Course</h2>
+
+    <form method="POST">
+        {{ form.hidden_tag() }}
+        
+        <div class="form-group">
+            {{ form.course.label(class="form-label") }}
+            {{ form.course(class="form-control") }}
+            {% if form.course.errors %}
+                <div class="text-danger">
+                    {% for error in form.course.errors %}
+                        <small>{{ error }}</small><br>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+        
+        <button type="submit" class="btn btn-primary">{{ form.submit.label }}</button>
+    </form>
+
+    <hr>
+
+    <h3>Available Courses</h3>
+    <ul class="list-group mt-3">
+        {% for course in courses %}
+            <li class="list-group-item">
+                <h4>{{ course.title }}</h4>
+                <p>{{ course.description }}</p>
+            </li>
+        {% else %}
+            <p>No courses available for enrollment.</p>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}

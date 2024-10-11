@@ -1,5 +1,46 @@
 {% extends "base.html" %}
+
 {% block content %}
-<h1>Welcome to the Learning Management System</h1>
-<p>This is the homepage.</p>
+<div class="container mt-5">
+    <div class="jumbotron text-center">
+        <h1>Welcome to the Learning Management System</h1>
+        <p class="lead">An all-in-one platform for managing courses, lessons, and quizzes. Whether you're a student or an instructor, we have everything you need to facilitate a smooth and interactive learning experience.</p>
+        <hr class="my-4">
+
+        {% if not current_user.is_authenticated %}
+            <p>Join us today! Sign up or log in to access all our courses and learning materials.</p>
+            <a class="btn btn-primary btn-lg" href="{{ url_for('register') }}" role="button">Register</a>
+            <a class="btn btn-secondary btn-lg" href="{{ url_for('login') }}" role="button">Login</a>
+        {% else %}
+            <p>Welcome back, {{ current_user.username }}!</p>
+            {% if current_user.role == 'student' %}
+                <a class="btn btn-primary btn-lg" href="{{ url_for('student_dashboard') }}" role="button">Go to Student Dashboard</a>
+            {% elif current_user.role == 'instructor' %}
+                <a class="btn btn-primary btn-lg" href="{{ url_for('instructor_dashboard') }}" role="button">Go to Instructor Dashboard</a>
+            {% elif current_user.role == 'admin' %}
+                <a class="btn btn-primary btn-lg" href="{{ url_for('admin_dashboard') }}" role="button">Go to Admin Dashboard</a>
+            {% endif %}
+        {% endif %}
+    </div>
+
+    <hr>
+
+    <!-- Featured Courses Section -->
+    <h2 class="text-center mb-4">Featured Courses</h2>
+    <div class="row">
+        {% for course in courses %}
+        <div class="col-md-4">
+            <div class="card mb-4 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">{{ course.title }}</h5>
+                    <p class="card-text">{{ course.description[:100] }}...</p>
+                    <a href="{{ url_for('course_detail', course_id=course.id) }}" class="btn btn-primary">View Course</a>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <p>No courses available at the moment. Please check back later.</p>
+        {% endfor %}
+    </div>
+</div>
 {% endblock %}

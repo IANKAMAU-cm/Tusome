@@ -1,0 +1,20 @@
+<!-- templates/my_courses.html -->
+
+{% extends "base.html" %}
+
+{% block content %}
+  <h2>My Enrolled Courses</h2>
+
+  {% if courses %}
+    <ul class="list-group">
+      {% for course in courses %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+          <span>{{ course.title }}</span>
+          <a href="{{ url_for('course_details', course_id=course.id) }}" class="btn btn-primary btn-sm">View Details</a>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>You are not enrolled in any courses yet.</p>
+  {% endif %}
+{% endblock %}

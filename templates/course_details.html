@@ -1,0 +1,41 @@
+<!-- templates/course_details.html -->
+
+{% extends "base.html" %}
+
+{% block content %}
+  <h2>{{ course.title }}</h2>
+  <p>{{ course.description }}</p>
+  <p><strong>Instructor:</strong> {{ course.instructor.user.username }}</p>
+
+  <hr>
+
+  <h3>Lessons</h3>
+  {% if lessons %}
+    <ul class="list-group">
+      {% for lesson in lessons %}
+        <li class="list-group-item">
+          <h5>{{ lesson.title }}</h5>
+          <p>{{ lesson.content }}</p>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>No lessons available for this course.</p>
+  {% endif %}
+
+  <hr>
+
+  <h3>Course Materials</h3>
+  {% if materials %}
+    <ul class="list-group">
+      {% for material in materials %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+          <span>{{ material.filename }}</span>
+          <a href="{{ url_for('download_material', material_id=material.id) }}" class="btn btn-secondary btn-sm">Download</a>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>No materials uploaded for this course.</p>
+  {% endif %}
+{% endblock %}

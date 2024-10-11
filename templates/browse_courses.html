@@ -1,0 +1,37 @@
+<!-- templates/browse_courses.html -->
+
+{% extends "base.html" %}
+
+{% block content %}
+  <h2>Available Courses</h2>
+
+  {% if courses %}
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>Title</th>
+          <th>Description</th>
+          <th>Instructor</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for course in courses %}
+          <tr>
+            <td>{{ course.title }}</td>
+            <td>{{ course.description }}</td>
+            <td>{{ course.instructor.user.username }}</td>
+            <td>
+              <form action="{{ url_for('enroll', course_id=course.id) }}" method="POST">
+                {{ form.hidden_tag() }}
+                <button type="submit" class="btn btn-success btn-sm">Enroll</button>
+              </form>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p>No available courses to enroll.</p>
+  {% endif %}
+{% endblock %}

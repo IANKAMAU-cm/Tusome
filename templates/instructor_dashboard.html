@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="text-center">Instructor Dashboard</h1>
+    <p class="text-center">Welcome, {{ current_user.username }}!</p>
+
+    <!-- Dashboard Overview (Key Instructor Stats) -->
+    <div class="row text-center mb-5">
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Total Courses</h5>
+                    <p class="card-text">{{ total_courses }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Total Students</h5>
+                    <p class="card-text">{{ total_students }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Assignments Pending</h5>
+                    <p class="card-text">{{ pending_assignments }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions for Instructors -->
+    <div class="text-center mb-5">
+        <a href="{{ url_for('create_course') }}" class="btn btn-primary btn-lg mx-2">Create New Course</a>
+        <a href="{{ url_for('view_courses') }}" class="btn btn-secondary btn-lg mx-2">View Your Courses</a>
+    </div>
+    <div class="text-center mb-5">
+        {% if current_user.role == RoleEnum.INSTRUCTOR %}
+        <a href="{{ url_for('upload_material') }}" class="btn btn-primary">
+          Upload Course Materials
+        </a>
+        {% endif %}
+      </div>
+
+    <!-- Additional Instructor Functionalities -->
+    <h3 class="text-center">Instructor Tools</h3>
+    <ul class="list-group text-center">
+        <li class="list-group-item"><a href="{{ url_for('manage_students') }}">Manage Students</a></li>
+        <li class="list-group-item"><a href="{{ url_for('assignment_overview') }}">View Assignments</a></li>
+        <li class="list-group-item"><a href="{{ url_for('grading') }}">Grading Center</a></li>
+        <li class="list-group-item"><a href="{{ url_for('instructor_support') }}">Instructor Support</a></li>
+        <!-- Add more instructor functionalities as needed -->
+    </ul>
+</div>
+{% endblock %}
