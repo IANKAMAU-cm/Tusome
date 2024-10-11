@@ -240,7 +240,7 @@ def enroll(course_id):
 @role_required(RoleEnum.STUDENT)
 def my_courses():
     """Route for students to view their enrolled courses."""
-    enrollments = current_user.student.enrolled_courses
+    enrollments = current_user.student.enrollments
     courses = [enrollment.course for enrollment in enrollments]
     return render_template('my_courses.html', courses=courses)
 

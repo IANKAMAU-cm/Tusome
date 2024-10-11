@@ -37,7 +37,7 @@ class CourseForm(FlaskForm):
     submit = SubmitField('Create Course')
 
 class EnrollCourseForm(FlaskForm):
-    course = SelectField('Select Course', coerce=int, validators=[DataRequired()])
+    #course = SelectField('Select Course', coerce=int, validators=[DataRequired()])
     submit = SubmitField('Enroll')
 
 class UploadMaterialForm(FlaskForm):
