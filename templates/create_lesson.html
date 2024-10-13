@@ -1,0 +1,29 @@
+<!-- templates/create_lesson.html -->
+
+{% extends "base.html" %}
+
+{% block content %}
+  <h2>Create Lesson for "{{ course.title }}"</h2>
+  
+  <form method="POST">
+    {{ form.hidden_tag() }}
+    <div class="form-group">
+      {{ form.title.label(class="form-label") }}
+      {{ form.title(class="form-control", placeholder="Enter lesson title") }}
+      {% for error in form.title.errors %}
+        <div class="text-danger">{{ error }}</div>
+      {% endfor %}
+    </div>
+    
+    <div class="form-group">
+      {{ form.content.label(class="form-label") }}
+      {{ form.content(class="form-control", placeholder="Enter lesson content", rows="10") }}
+      {% for error in form.content.errors %}
+        <div class="text-danger">{{ error }}</div>
+      {% endfor %}
+    </div>
+    
+    <button type="submit" class="btn btn-primary">{{ form.submit.label.text }}</button>
+    <a href="{{ url_for('instructor_dashboard') }}" class="btn btn-secondary">Cancel</a>
+  </form>
+{% endblock %}

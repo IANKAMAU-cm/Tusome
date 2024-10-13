@@ -33,6 +33,18 @@
         </div>
     </div>
 
+    <div class="row text-center mb-5">
+        <h3>Your Courses</h3>
+        <ul class="list-group">
+            {% for course in courses %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <span>{{ course.title }}</span>
+                <a href="{{ url_for('course_details', course_id=course.id) }}" class="btn btn-primary">View Course Details</a>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+
     <!-- Quick Actions for Instructors -->
     <div class="text-center mb-5">
         <a href="{{ url_for('create_course') }}" class="btn btn-primary btn-lg mx-2">Create New Course</a>

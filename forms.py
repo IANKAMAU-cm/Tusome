@@ -44,3 +44,13 @@ class UploadMaterialForm(FlaskForm):
     course = SelectField('Course', coerce=int, validators=[DataRequired()])
     material = FileField('Course Material', validators=[DataRequired(), FileAllowed(['pdf', 'docx', 'pptx'], 'Documents only!')])
     submit = SubmitField('Upload Material')
+
+class LessonForm(FlaskForm):
+    """Form for creating and editing lessons."""
+    title = StringField('Lesson Title', validators=[DataRequired(), Length(max=200)])
+    content = TextAreaField('Lesson Content', validators=[DataRequired()])
+    submit = SubmitField('Save Lesson')
+
+class DeleteLessonForm(FlaskForm):
+    """Form for deleting a lesson."""
+    submit = SubmitField('Delete Lesson')

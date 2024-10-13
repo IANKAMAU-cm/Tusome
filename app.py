@@ -3,11 +3,12 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from extensions import db  # Import db from extensions (correct place)
-from models import User, Course, CourseMaterial, Submission, Enrollment, Student, Quiz, RoleEnum, Instructor  # Import your models
-from forms import RegistrationForm, LoginForm, CourseForm, EnrollCourseForm, UploadMaterialForm
+from models import User, Course, CourseMaterial, Submission, Enrollment, Student, Quiz, RoleEnum, Instructor, Lesson  # Import your models
+from forms import RegistrationForm, LoginForm, CourseForm, EnrollCourseForm, UploadMaterialForm, LessonForm, DeleteLessonForm
 from functools import wraps
 from werkzeug.utils import secure_filename
 import os
+from enum import Enum
 from models import RoleEnum
 from flask_wtf import CSRFProtect
 
@@ -174,17 +175,94 @@ def instructor_dashboard():
     # To get total students related to the instructor's courses:
     total_students = Student.query.join(Enrollment).join(Course).filter(Course.instructor_id == instructor.id).distinct().count()
     pending_assignments = Quiz.query.filter_by(status='pending').count()
+    courses = instructor.courses  # Fetch all courses associated with the instructor
 
     return render_template('instructor_dashboard.html', 
                            total_courses=total_courses, 
                            total_students=total_students,
-                           pending_assignments=pending_assignments)
+                           pending_assignments=pending_assignments,
+                           courses=courses)
 
 @app.route('/instructor/view_courses')
-@login_required
+@role_required(RoleEnum.INSTRUCTOR)
 def view_courses():
-    """Instructor view courses route."""
-    return render_template('view_courses.html')
+    """Route for instructors to view their courses."""
+    instructor = current_user.instructor
+    if not instructor:
+        flash('Instructor profile not found.', 'danger')
+        return redirect(url_for('index'))
+    
+    courses = instructor.courses  # Access the related courses
+    return render_template('view_courses.html', courses=courses)
+
+
+# 2.1. Route to Create a Lesson
+@app.route('/instructor/create_lesson/<int:course_id>', methods=['GET', 'POST'])
+@role_required(RoleEnum.INSTRUCTOR)
+def create_lesson(course_id):
+    """Route for instructors to create a new lesson for a specific course."""
+    course = Course.query.get_or_404(course_id)
+    
+    # Ensure the current instructor owns the course
+    if course.instructor_id != current_user.instructor.id:
+        abort(403)  # Forbidden
+
+    form = LessonForm()
+    if form.validate_on_submit():
+        new_lesson = Lesson(
+            title=form.title.data,
+            content=form.content.data,
+            course_id=course.id
+        )
+        db.session.add(new_lesson)
+        db.session.commit()
+        flash(f'Lesson "{new_lesson.title}" has been created successfully.', 'success')
+        return redirect(url_for('instructor_dashboard'))
+    return render_template('create_lesson.html', form=form, course=course)
+
+# 2.2. Route to Edit a Lesson
+@app.route('/instructor/edit_lesson/<int:lesson_id>', methods=['GET', 'POST'])
+@role_required(RoleEnum.INSTRUCTOR)
+def edit_lesson(lesson_id):
+    """Route for instructors to edit an existing lesson."""
+    lesson = Lesson.query.get_or_404(lesson_id)
+    course = lesson.course
+    
+    # Ensure the current instructor owns the course
+    if course.instructor_id != current_user.instructor.id:
+        abort(403)  # Forbidden
+
+    form = LessonForm(obj=lesson)
+    if form.validate_on_submit():
+        lesson.title = form.title.data
+        lesson.content = form.content.data
+        db.session.commit()
+        flash(f'Lesson "{lesson.title}" has been updated successfully.', 'success')
+        return redirect(url_for('instructor_dashboard'))
+    return render_template('edit_lesson.html', form=form, lesson=lesson)
+
+# 2.3. Route to Delete a Lesson
+@app.route('/instructor/delete_lesson/<int:lesson_id>', methods=['POST'])
+@role_required(RoleEnum.INSTRUCTOR)
+def delete_lesson(lesson_id):
+    """Route for instructors to delete a lesson."""
+    lesson = Lesson.query.get_or_404(lesson_id)
+    course = lesson.course
+    
+    # Ensure the current instructor owns the course
+    if course.instructor_id != current_user.instructor.id:
+        abort(403)  # Forbidden
+
+    form = DeleteLessonForm()
+    if form.validate_on_submit():
+        db.session.delete(lesson)
+        db.session.commit()
+        flash(f'Lesson "{lesson.title}" has been deleted successfully.', 'success')
+    else:
+        flash('Failed to delete the lesson. Please try again.', 'danger')
+    return redirect(url_for('instructor_dashboard'))
+
+
 
 # Student Dashboard
 @app.route('/student_dashboard')
@@ -246,22 +324,37 @@ def my_courses():
 
 
 @app.route('/course/<int:course_id>')
-@role_required(RoleEnum.STUDENT)
+@login_required
 def course_details(course_id):
-    """Route to view course details and materials."""
-    # Check if the student is enrolled in the course
-    enrollment = Enrollment.query.filter_by(student_id=current_user.student.id, course_id=course_id).first()
-    if not enrollment:
-        flash('You are not enrolled in this course.', 'danger')
-        return redirect(url_for('browse_courses'))
-
-    # Fetch course details
+    """Route to view course details and manage materials."""
     course = Course.query.get_or_404(course_id)
-    lessons = course.lessons
-    materials = course.materials
 
-    return render_template('course_details.html', course=course, lessons=lessons, materials=materials)
-
+    if current_user.role == RoleEnum.STUDENT:
+        # Check if the student is enrolled in the course
+        enrollment = Enrollment.query.filter_by(student_id=current_user.student.id, course_id=course_id).first()
+        if not enrollment:
+            flash('You are not enrolled in this course.', 'danger')
+            return redirect(url_for('browse_courses'))
+        
+        lessons = course.lessons
+        materials = course.materials
+        return render_template('course_details.html', course=course, lessons=lessons, materials=materials)
+    
+    elif current_user.role == RoleEnum.INSTRUCTOR:
+        # Ensure the instructor owns the course
+        if course.instructor_id != current_user.instructor.id:
+            flash('You do not have permission to view this course.', 'danger')
+            return redirect(url_for('instructor_dashboard'))
+        
+        lessons = course.lessons
+        materials = course.materials
+        delete_form = DeleteLessonForm()
+        return render_template('course_details.html', course=course, lessons=lessons, materials=materials, form=delete_form)
+    
+    else:
+        # For other roles, deny access
+        flash('Access denied.', 'danger')
+        abort(403)
 
 @app.route('/download_material/<int:material_id>')
 @role_required(RoleEnum.STUDENT)
@@ -341,6 +434,29 @@ def create_course():
         flash('Course created successfully!', 'success')
         return redirect(url_for('instructor_dashboard'))
     return render_template('create_course.html', form=form)
+
+
+@app.route('/instructor/edit_course/<int:course_id>', methods=['GET', 'POST'])
+@role_required(RoleEnum.INSTRUCTOR)
+def edit_course(course_id):
+    """Route for instructors to edit an existing course."""
+    course = Course.query.get_or_404(course_id)
+    
+    # Ensure the current instructor owns the course
+    if course.instructor_id != current_user.instructor.id:
+        flash('You do not have permission to edit this course.', 'danger')
+        return redirect(url_for('view_courses'))
+    
+    form = CourseForm(obj=course)  # Pre-populate form with existing course data
+    if form.validate_on_submit():
+        course.title = form.title.data
+        course.description = form.description.data
+        db.session.commit()
+        flash(f'Course "{course.title}" has been updated successfully.', 'success')
+        return redirect(url_for('view_courses'))
+    
+    return render_template('edit_course.html', form=form, course=course)
+
 
 @app.route('/upload_material', methods=['GET', 'POST'])
 @login_required
