@@ -23,7 +23,7 @@
       {% endfor %}
     </div>
     
-    <button type="submit" class="btn btn-primary">{{ form.submit.label.text }}</button>
+    <button type="submit" class="btn btn-primary">{{ form.submit() }}</button>
     <a href="{{ url_for('instructor_dashboard') }}" class="btn btn-secondary">Cancel</a>
   </form>
 {% endblock %}

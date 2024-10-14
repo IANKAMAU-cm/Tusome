@@ -1,0 +1,89 @@
+.book-container {
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 20px;
+    border: 1px solid #ccc;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    background: #f9f9f9;
+    font-family: 'Georgia', serif;
+}
+
+.book-content {
+    line-height: 1.6;
+    font-size: 18px;
+}
+
+h1 {
+    font-size: 2.5em;
+    margin-bottom: 20px;
+}
+
+/* General Button Styles */
+.btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    color: white;
+    background-color: #007BFF;
+    text-decoration: none;
+    display: inline-block;
+    transition: background-color 0.3s;
+}
+
+.btn:hover {
+    background-color: #0056b3;
+}
+
+/* Header Styles */
+h1, h2, h3 {
+    color: #333;
+    font-family: 'Arial', sans-serif;
+}
+
+/* Link Styles */
+a {
+    color: #007BFF;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* Navigation Styles */
+.nav-link {
+    padding: 10px;
+    color: #007BFF;
+    transition: color 0.3s;
+}
+
+.nav-link:hover {
+    color: #0056b3;
+}
+
+.course-container {
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 20px;
+    border: 1px solid #ccc;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    background: #f9f9f9;
+}
+
+.course-container h2 {
+    font-size: 2.5em;
+    margin-bottom: 20px;
+}
+
+.course-container h3 {
+    font-size: 1.8em;
+    margin-top: 30px;
+}
+
+.course-container .list-group {
+    margin-top: 10px;
+}
+
+.course-container .btn {
+    margin-left: 10px;
+}

@@ -7,7 +7,7 @@
         
         <div class="form-group">
             {{ form.title.label(class="form-label") }}
-            {{ form.title(class="form-control", size=80) }}
+            {{ form.title(class="form-control", size=80, placeholder="e.g., Introduction to Python") }}
             {% if form.title.errors %}
                 <div class="text-danger">
                     {% for error in form.title.errors %}
@@ -19,7 +19,7 @@
         
         <div class="form-group">
             {{ form.description.label(class="form-label") }}
-            {{ form.description(class="form-control", rows=5, cols=80) }}
+            {{ form.description(class="form-control", rows=5, cols=80, placeholder="Provide a brief overview of the course.") }}
             {% if form.description.errors %}
                 <div class="text-danger">
                     {% for error in form.description.errors %}
@@ -29,7 +29,13 @@
             {% endif %}
         </div>
 
-        <button type="submit" class="btn btn-primary">{{ form.submit.label }}</button>
+        <div class="form-group">
+            <label for="is_featured">Featured Course</label>
+            {{ form.is_featured() }} {{ form.is_featured.label }}
+        </div>
+
+        <button type="submit" class="btn btn-primary">{{ form.submit() }}</button>
+        <a href="{{ url_for('view_courses') }}" class="btn btn-secondary">Cancel</a>
     </form>
 </div>
 {% endblock %}

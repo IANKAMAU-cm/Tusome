@@ -1,9 +1,17 @@
-<!-- templates/browse_courses.html -->
-
 {% extends "base.html" %}
 
 {% block content %}
   <h2>Available Courses</h2>
+
+  {% with messages = get_flashed_messages() %}
+    {% if messages %}
+      <ul class="alert alert-danger">
+        {% for message in messages %}
+          <li>{{ message }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+  {% endwith %}
 
   {% if courses %}
     <table class="table table-striped">
@@ -22,9 +30,10 @@
             <td>{{ course.description }}</td>
             <td>{{ course.instructor.user.username }}</td>
             <td>
-              <form action="{{ url_for('enroll', course_id=course.id) }}" method="POST">
+              <a href="{{ url_for('course_details', course_id=course.id) }}" class="btn btn-info btn-sm">View Details</a>
+              <form action="{{ url_for('enroll', course_id=course.id) }}" method="POST" style="display:inline;">
                 {{ form.hidden_tag() }}
-                <button type="submit" class="btn btn-success btn-sm">Enroll</button>
+                <button type="submit" class="btn btn-success btn-sm" onclick="return confirm('Are you sure you want to enroll in this course?');">Enroll</button>
               </form>
             </td>
           </tr>
@@ -32,6 +41,6 @@
       </tbody>
     </table>
   {% else %}
-    <p>No available courses to enroll.</p>
+    <p class="text-muted">No available courses to enroll.</p>
   {% endif %}
 {% endblock %}

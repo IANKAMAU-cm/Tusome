@@ -55,6 +55,7 @@ class Course(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(200), nullable=False)
     description = db.Column(db.Text, nullable=False)
+    is_featured = db.Column(db.Boolean, default=False)
     instructor_id = db.Column(db.Integer, db.ForeignKey('instructor.id'), nullable=False)
 
     # Define relationship with Instructor
@@ -72,6 +73,7 @@ class Lesson(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(200), nullable=False)
     content = db.Column(db.Text, nullable=False)
+    slug = db.Column(db.String(100), unique=True, nullable=False)  # Use this for the URL
     course_id = db.Column(db.Integer, db.ForeignKey('course.id'), nullable=False)
 
     # Define relationship with Course

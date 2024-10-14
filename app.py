@@ -11,6 +11,7 @@ import os
 from enum import Enum
 from models import RoleEnum
 from flask_wtf import CSRFProtect
+from slugify import slugify
 
 # Initialize the app
 app = Flask(__name__)
@@ -209,15 +210,19 @@ def create_lesson(course_id):
 
     form = LessonForm()
     if form.validate_on_submit():
+        # Generate slug from the lesson title
+        slug = slugify(form.title.data)
+        
         new_lesson = Lesson(
             title=form.title.data,
             content=form.content.data,
-            course_id=course.id
+            course_id=course.id,
+            slug=slug  # Save the slug in the lesson model
         )
         db.session.add(new_lesson)
         db.session.commit()
         flash(f'Lesson "{new_lesson.title}" has been created successfully.', 'success')
-        return redirect(url_for('instructor_dashboard'))
+        return redirect(url_for('lesson_detail', slug=slug))  # Redirect to the lesson detail page
     return render_template('create_lesson.html', form=form, course=course)
 
 # 2.2. Route to Edit a Lesson
@@ -262,7 +267,10 @@ def delete_lesson(lesson_id):
         flash('Failed to delete the lesson. Please try again.', 'danger')
     return redirect(url_for('instructor_dashboard'))
 
-
+@app.route('/lesson/<slug>')
+def lesson_detail(slug):
+    lesson = Lesson.query.filter_by(slug=slug).first_or_404()
+    return render_template('lesson_detail.html', lesson=lesson)
 
 # Student Dashboard
 @app.route('/student_dashboard')
@@ -426,6 +434,7 @@ def create_course():
         course = Course(
             title=form.title.data,
             description=form.description.data,
+            is_featured=form.is_featured.data,
             instructor_id=current_user.instructor.id
         )
 
@@ -451,6 +460,7 @@ def edit_course(course_id):
     if form.validate_on_submit():
         course.title = form.title.data
         course.description = form.description.data
+        course.is_featured = form.is_featured.data 
         db.session.commit()
         flash(f'Course "{course.title}" has been updated successfully.', 'success')
         return redirect(url_for('view_courses'))
@@ -514,9 +524,18 @@ def instructor_support():
 def assignment_overview():
     return render_template('assignment_overview.html')
 
+@app.route('/privacy-policy')
+def privacy_policy():
+    return render_template('privacy_policy.html')
+
+@app.route('/terms-of-service')
+def terms_of_service():
+    return render_template('terms_of_service.html')
+
 @app.route('/')
 def index():
-    return render_template('index.html')
+    courses = Course.query.filter_by(is_featured=True).all()  # Assuming there's an is_featured field
+    return render_template('index.html', courses=courses)
 
 @app.route('/logout')
 @login_required

@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="book-container">
+    <h1>{{ lesson.title }}</h1>
+    <div class="book-content">
+        <p>{{ lesson.content | safe }}</p>
+    </div>
+</div>
+{% endblock %}

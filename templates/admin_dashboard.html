@@ -5,6 +5,34 @@
     <h1 class="mt-4">Admin Dashboard</h1>
     <p class="lead">Welcome, <strong>{{ current_user.username }}</strong>!</p>
 
+    <!-- Dashboard Metrics -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card text-white bg-primary mb-3">
+                <div class="card-header">Total Users</div>
+                <div class="card-body">
+                    <h5 class="card-title">{{ total_users }}</h5>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-white bg-success mb-3">
+                <div class="card-header">Total Courses</div>
+                <div class="card-body">
+                    <h5 class="card-title">{{ total_courses }}</h5>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-white bg-warning mb-3">
+                <div class="card-header">Total Enrollments</div>
+                <div class="card-body">
+                    <h5 class="card-title">{{ total_enrollments }}</h5>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Admin Navigation -->
     <nav class="nav flex-column mb-4">
         <a class="nav-link" href="{{ url_for('manage_users') }}">Manage Users</a>

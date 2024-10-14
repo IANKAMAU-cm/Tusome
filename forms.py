@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField, SelectField, TextAreaField, FileField
+from wtforms import StringField, PasswordField, SubmitField, SelectField, TextAreaField, FileField, BooleanField
 from wtforms.validators import DataRequired, EqualTo, ValidationError, Length
 from models import User
 from enum import Enum
@@ -34,6 +34,7 @@ class CourseForm(FlaskForm):
     """Form for creating a new course."""
     title = StringField('Course Title', validators=[DataRequired()])
     description = TextAreaField('Course Description', validators=[DataRequired()])
+    is_featured = BooleanField('Featured Course')
     submit = SubmitField('Create Course')
 
 class EnrollCourseForm(FlaskForm):
