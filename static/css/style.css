@@ -87,3 +87,75 @@ a:hover {
 .course-container .btn {
     margin-left: 10px;
 }
+
+.card-title {
+    font-size: 1.25rem;
+    font-weight: bold;
+}
+
+.card-text {
+    font-size: 0.95rem;
+    color: #555;
+}
+
+.btn-primary {
+    background-color: #007BFF;
+    border-color: #007BFF;
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+    border-color: #004085;
+}
+
+.alert-info {
+    background-color: #d1ecf1;
+    color: #0c5460;
+}
+
+.alert-warning {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 767.98px) {
+    .card-title {
+        font-size: 1.1rem;
+    }
+
+    .card-text {
+        font-size: 0.9rem;
+    }
+}
+
+html, body {
+    height: 100%;
+    margin: 0;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+}
+
+#wrapper {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+#content {
+    flex: 1;
+}
+
+footer {
+    background-color: #f8f9fa;
+    padding: 1rem 0;
+}
+
+.sidebar {
+    width: 220px;
+    height: 100vh; /* Full viewport height */
+    background-color: #f8f9fa; /* Light background for contrast */
+}

@@ -12,6 +12,7 @@ from enum import Enum
 from models import RoleEnum
 from flask_wtf import CSRFProtect
 from slugify import slugify
+from datetime import datetime
 
 # Initialize the app
 app = Flask(__name__)
@@ -29,6 +30,10 @@ db.init_app(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'  # Redirect to login page if not authenticated
+
+@app.context_processor
+def inject_current_year():
+    return {'current_year': datetime.utcnow().year}
 
 # Define user loader for Flask-Login
 @login_manager.user_loader

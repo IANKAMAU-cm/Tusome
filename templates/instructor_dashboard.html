@@ -1,71 +1,98 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="container mt-5">
-    <h1 class="text-center">Instructor Dashboard</h1>
-    <p class="text-center">Welcome, {{ current_user.username }}!</p>
+<div class="container-fluid mt-5">
+    <div class="row">
+        <!-- Left Sidebar (Navbar) -->
+        <nav class="col-md-3 col-lg-2 d-md-block bg-light sidebar shadow-sm" style="position: fixed; top: 0; bottom: 0; left: 0;">
+            <div class="position-sticky">
+                <ul class="nav flex-column mt-4">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{{ url_for('create_course') }}">
+                            Create New Course
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('manage_students') }}">
+                            Manage Students
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('assignment_overview') }}">
+                            View Assignments
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('grading') }}">
+                            Grading Center
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('instructor_support') }}">
+                            Instructor Support
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('view_courses') }}">
+                            View Your Courses
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        {% if current_user.role == RoleEnum.INSTRUCTOR %}
+                        <a class="nav-link" href="{{ url_for('upload_material') }}">
+                            Upload Course Materials
+                        </a>
+                        {% endif %}
+                    </li>
+                </ul>
+            </div>
+        </nav>
 
-    <!-- Dashboard Overview (Key Instructor Stats) -->
-    <div class="row text-center mb-5">
-        <div class="col-md-4">
-            <div class="card shadow-sm">
-                <div class="card-body">
-                    <h5 class="card-title">Total Courses</h5>
-                    <p class="card-text">{{ total_courses }}</p>
+        <!-- Main Content Area -->
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 offset-lg-2" style="margin-left: 220px;">
+            <h1 class="text-center">Instructor Dashboard</h1>
+            <p class="text-center">Welcome, {{ current_user.username }}!</p>
+
+            <!-- Dashboard Overview (Key Instructor Stats) -->
+            <div class="row text-center mb-5">
+                <div class="col-md-4">
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+                            <h5 class="card-title">Total Courses</h5>
+                            <p class="card-text">{{ total_courses }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+                            <h5 class="card-title">Total Students</h5>
+                            <p class="card-text">{{ total_students }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+                            <h5 class="card-title">Assignments Pending</h5>
+                            <p class="card-text">{{ pending_assignments }}</p>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card shadow-sm">
-                <div class="card-body">
-                    <h5 class="card-title">Total Students</h5>
-                    <p class="card-text">{{ total_students }}</p>
-                </div>
+
+            <div class="row text-center mb-5">
+                <h3>Your Courses</h3>
+                <ul class="list-group">
+                    {% for course in courses %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span>{{ course.title }}</span>
+                        <a href="{{ url_for('course_details', course_id=course.id) }}" class="btn btn-primary">View Course Details</a>
+                    </li>
+                    {% endfor %}
+                </ul>
             </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card shadow-sm">
-                <div class="card-body">
-                    <h5 class="card-title">Assignments Pending</h5>
-                    <p class="card-text">{{ pending_assignments }}</p>
-                </div>
-            </div>
-        </div>
+        </main>
     </div>
-
-    <div class="row text-center mb-5">
-        <h3>Your Courses</h3>
-        <ul class="list-group">
-            {% for course in courses %}
-            <li class="list-group-item d-flex justify-content-between align-items-center">
-                <span>{{ course.title }}</span>
-                <a href="{{ url_for('course_details', course_id=course.id) }}" class="btn btn-primary">View Course Details</a>
-            </li>
-            {% endfor %}
-        </ul>
-    </div>
-
-    <!-- Quick Actions for Instructors -->
-    <div class="text-center mb-5">
-        <a href="{{ url_for('create_course') }}" class="btn btn-primary btn-lg mx-2">Create New Course</a>
-        <a href="{{ url_for('view_courses') }}" class="btn btn-secondary btn-lg mx-2">View Your Courses</a>
-    </div>
-    <div class="text-center mb-5">
-        {% if current_user.role == RoleEnum.INSTRUCTOR %}
-        <a href="{{ url_for('upload_material') }}" class="btn btn-primary">
-          Upload Course Materials
-        </a>
-        {% endif %}
-      </div>
-
-    <!-- Additional Instructor Functionalities -->
-    <h3 class="text-center">Instructor Tools</h3>
-    <ul class="list-group text-center">
-        <li class="list-group-item"><a href="{{ url_for('manage_students') }}">Manage Students</a></li>
-        <li class="list-group-item"><a href="{{ url_for('assignment_overview') }}">View Assignments</a></li>
-        <li class="list-group-item"><a href="{{ url_for('grading') }}">Grading Center</a></li>
-        <li class="list-group-item"><a href="{{ url_for('instructor_support') }}">Instructor Support</a></li>
-        <!-- Add more instructor functionalities as needed -->
-    </ul>
 </div>
 {% endblock %}
