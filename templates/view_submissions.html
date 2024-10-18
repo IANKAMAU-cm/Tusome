@@ -1,35 +1,43 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="container">
-    <h2>View Submissions</h2>
+<div class="container mt-5">
+    <h2>Quiz Submissions for {{ quiz.title }}</h2>
 
-    <!-- Flash messages for notifications -->
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        <div class="alert alert-dismissible">
-          {% for category, message in messages %}
-            <div class="alert alert-{{ category }}">
-              {{ message }}
-            </div>
-          {% endfor %}
-        </div>
-      {% endif %}
-    {% endwith %}
-
-    <ul class="list-group">
-        {% for submission in submissions %}
-        <li class="list-group-item d-flex justify-content-between align-items-center">
-            <div>
-                <strong>{{ submission.student.username }}</strong>:
-                <a href="{{ url_for('static', filename='submissions/' + submission.submission_file) }}" class="btn btn-link">Download</a>
-            </div>
-            <form method="POST" action="{{ url_for('grade_submission', submission_id=submission.id) }}" class="form-inline">
-                <input type="number" name="grade" placeholder="Enter Grade" required class="form-control mr-2" min="0" max="100">
-                <button type="submit" class="btn btn-primary">Submit Grade</button>
-            </form>
-        </li>
-        {% endfor %}
-    </ul>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Student</th>
+                <th>Submission Date</th>
+                <th>Answers</th>
+                <th>Grade</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for submission in submissions %}
+            <tr>
+                <td>{{ submission.student.user.username }}</td>
+                <td>{{ submission.submission_date.strftime('%Y-%m-%d') }}</td>
+                <td>
+                    <ul>
+                        {% for answer in submission.answers %}
+                        <li>{{ answer.question_text }}: {{ answer.student_answer }}</li>
+                        {% endfor %}
+                    </ul>
+                </td>
+                <td>{{ submission.grade or 'Ungraded' }}</td>
+                <td>
+                    <form method="POST" action="{{ url_for('grade_submission', submission_id=submission.id) }}">
+                        <div class="form-group">
+                            <input type="number" name="grade" class="form-control" min="0" max="100" value="{{ submission.grade }}">
+                        </div>
+                        <button type="submit" class="btn btn-success">Assign Grade</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 </div>
 {% endblock %}

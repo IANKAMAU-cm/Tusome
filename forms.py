@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField, SelectField, TextAreaField, FileField, BooleanField
+from wtforms import StringField, PasswordField, SubmitField, SelectField, TextAreaField, FileField, BooleanField, FieldList, FormField
 from wtforms.validators import DataRequired, EqualTo, ValidationError, Length
 from models import User
 from enum import Enum
@@ -55,3 +55,17 @@ class LessonForm(FlaskForm):
 class DeleteLessonForm(FlaskForm):
     """Form for deleting a lesson."""
     submit = SubmitField('Delete Lesson')
+
+class QuestionForm(FlaskForm):
+    """Form for creating a question."""
+    question_text = TextAreaField('Question', validators=[DataRequired()])
+    correct_answer = StringField('Correct Answer', validators=[DataRequired()])
+    submit = SubmitField('Add Question')
+
+class QuizForm(FlaskForm):
+    """Form for creating a quiz."""
+    title = StringField('Quiz Title', validators=[DataRequired()])
+    status = SelectField('Quiz Status', choices=[('active', 'Active'), ('inactive', 'Inactive')], validators=[DataRequired()])
+    questions = FieldList(FormField(QuestionForm), min_entries=1)  # Add at least one question
+    submit = SubmitField('Create Quiz')
+

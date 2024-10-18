@@ -4,7 +4,7 @@
 <div class="book-container">
     <h1>{{ lesson.title }}</h1>
     <div class="book-content">
-        <p>{{ lesson.content | safe }}</p>
+        <p>{{ lesson.content | nl2br | safe }}</p>
     </div>
 </div>
 {% endblock %}

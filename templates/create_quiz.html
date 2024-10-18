@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>Create a New Quiz</h2>
+    <form method="POST" action="{{ url_for('create_quiz') }}">
+        {{ form.hidden_tag() }}
+
+        <div class="form-group">
+            {{ form.title.label(class="form-label") }}
+            {{ form.title(class="form-control") }}
+            {% if form.title.errors %}
+                <small class="text-danger">{{ form.title.errors[0] }}</small>
+            {% endif %}
+        </div>
+
+        <div class="form-group">
+            {{ form.status.label(class="form-label") }}
+            {{ form.status(class="form-control") }}
+            {% if form.status.errors %}
+                <small class="text-danger">{{ form.status.errors[0] }}</small>
+            {% endif %}
+        </div>
+
+        <div id="questions-container">
+            <h4>Add Questions</h4>
+            <!-- Add multiple questions here -->
+            {% for question in form.questions %}
+                <div class="form-group">
+                    {{ question.question_text.label(class="form-label") }}
+                    {{ question.question_text(class="form-control") }}
+                    {% if question.question_text.errors %}
+                        <small class="text-danger">{{ question.question_text.errors[0] }}</small>
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    {{ question.correct_answer.label(class="form-label") }}
+                    {{ question.correct_answer(class="form-control") }}
+                    {% if question.correct_answer.errors %}
+                        <small class="text-danger">{{ question.correct_answer.errors[0] }}</small>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+
+        <button type="submit" class="btn btn-primary">Create Quiz</button>
+    </form>
+</div>
+{% endblock %}

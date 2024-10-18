@@ -3,8 +3,8 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from extensions import db  # Import db from extensions (correct place)
-from models import User, Course, CourseMaterial, Submission, Enrollment, Student, Quiz, RoleEnum, Instructor, Lesson  # Import your models
-from forms import RegistrationForm, LoginForm, CourseForm, EnrollCourseForm, UploadMaterialForm, LessonForm, DeleteLessonForm
+from models import User, Course, CourseMaterial, Submission, Enrollment, Student, Quiz, RoleEnum, Instructor, Lesson, Question, QuizSubmission  # Import your models
+from forms import RegistrationForm, LoginForm, CourseForm, EnrollCourseForm, UploadMaterialForm, LessonForm, DeleteLessonForm, QuestionForm, QuizForm
 from functools import wraps
 from werkzeug.utils import secure_filename
 import os
@@ -13,6 +13,7 @@ from models import RoleEnum
 from flask_wtf import CSRFProtect
 from slugify import slugify
 from datetime import datetime
+import re
 
 # Initialize the app
 app = Flask(__name__)
@@ -30,6 +31,14 @@ db.init_app(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'  # Redirect to login page if not authenticated
+
+
+# Custom filter to convert newlines to <br> tags
+def nl2br(value):
+    return re.sub(r'\n', '<br>\n', value)
+
+# Register the filter with Jinja2
+app.jinja_env.filters['nl2br'] = nl2br
 
 @app.context_processor
 def inject_current_year():
@@ -516,6 +525,75 @@ def manage_students():
     """Admin manage students route."""
     students = Student.query.all()
     return render_template('manage_students.html', students=students)
+
+
+
+@app.route('/instructor/create_quiz', methods=['GET', 'POST'])
+@login_required
+def create_quiz(course_id):
+    if current_user.role != RoleEnum.INSTRUCTOR:
+        flash('You are not authorized to access this page.')
+        return redirect(url_for('index'))
+
+    form = QuizForm()
+    if form.validate_on_submit():
+        quiz = Quiz(title=form.title.data, status=form.status.data, course_id=course_id)  # Pass appropriate course ID
+        db.session.add(quiz)
+        db.session.commit()
+
+        # Add questions to the quiz
+        for q in form.questions.data:
+            question = Question(question_text=q['question_text'], correct_answer=q['correct_answer'], quiz_id=quiz.id)
+            db.session.add(question)
+
+        db.session.commit()
+        flash('Quiz created successfully!', 'success')
+        return redirect(url_for('instructor_dashboard'))
+
+    return render_template('create_quiz.html', form=form)
+
+
+
+
+@app.route('/quiz/<int:quiz_id>', methods=['GET', 'POST'])
+@login_required
+def take_quiz(quiz_id):
+    if current_user.role != RoleEnum.STUDENT:
+        flash('You are not authorized to access this page.')
+        return redirect(url_for('index'))
+
+    quiz = Quiz.query.get_or_404(quiz_id)
+    form = EnrollCourseForm()  # Or a specific form for quiz submission
+
+    if form.validate_on_submit():
+        for question in quiz.questions:
+            selected_answer = request.form.get(f'question_{question.id}')
+            submission = QuizSubmission(student_id=current_user.id, quiz_id=quiz.id, question_id=question.id, selected_answer=selected_answer)
+            db.session.add(submission)
+
+        db.session.commit()
+        flash('Quiz submitted successfully!', 'success')
+        return redirect(url_for('student_dashboard'))
+
+    return render_template('take_quiz.html', quiz=quiz, form=form)
+
+
+
+
+@app.route('/instructor/view_submissions/<int:quiz_id>', methods=['GET'])
+@login_required
+def view_submissions(quiz_id):
+    if current_user.role != RoleEnum.INSTRUCTOR:
+        flash('You are not authorized to access this page.')
+        return redirect(url_for('index'))
+
+    quiz = Quiz.query.get_or_404(quiz_id)
+    submissions = QuizSubmission.query.filter_by(quiz_id=quiz_id).all()
+    
+    return render_template('view_submissions.html', quiz=quiz, submissions=submissions)
+
+
+
 
 @app.route('/grading')
 def grading():

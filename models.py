@@ -50,6 +50,8 @@ class Student(db.Model):
     # Define one-to-many relationship with Submission
     submissions = db.relationship('Submission', back_populates='student', lazy=True)
 
+    quiz_submissions = db.relationship('QuizSubmission', back_populates='student', lazy=True)
+
 class Course(db.Model):
     """Model for Course."""
     id = db.Column(db.Integer, primary_key=True)
@@ -105,6 +107,8 @@ class Quiz(db.Model):
     # Define one-to-many relationship with Question
     questions = db.relationship('Question', back_populates='quiz', lazy=True)
 
+    quiz_submissions = db.relationship('QuizSubmission', back_populates='quiz', lazy=True)
+
 class Question(db.Model):
     """Model for Questions in a Quiz."""
     id = db.Column(db.Integer, primary_key=True)
@@ -114,6 +118,8 @@ class Question(db.Model):
 
     # Define relationship with Quiz
     quiz = db.relationship('Quiz', back_populates='questions')
+
+    quiz_submissions = db.relationship('QuizSubmission', back_populates='question', lazy=True)
 
 class CourseMaterial(db.Model):
     """Model for Course Materials uploaded by Instructors."""
@@ -137,3 +143,17 @@ class Submission(db.Model):
     # Define relationships
     student = db.relationship('Student', back_populates='submissions')
     course = db.relationship('Course', back_populates='submissions')
+
+class QuizSubmission(db.Model):
+    """Model to store student submissions for quizzes."""
+    id = db.Column(db.Integer, primary_key=True)
+    student_id = db.Column(db.Integer, db.ForeignKey('student.id'), nullable=False)
+    quiz_id = db.Column(db.Integer, db.ForeignKey('quiz.id'), nullable=False)
+    question_id = db.Column(db.Integer, db.ForeignKey('question.id'), nullable=False)
+    selected_answer = db.Column(db.String(200), nullable=False)
+    submission_date = db.Column(db.DateTime, default=datetime.utcnow)
+
+    # Relationships
+    student = db.relationship('Student', back_populates='quiz_submissions')
+    quiz = db.relationship('Quiz', back_populates='quiz_submissions')
+    question = db.relationship('Question', back_populates='quiz_submissions')
