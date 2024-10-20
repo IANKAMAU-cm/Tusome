@@ -360,7 +360,8 @@ def course_details(course_id):
         
         lessons = course.lessons
         materials = course.materials
-        return render_template('course_details.html', course=course, lessons=lessons, materials=materials)
+        quizzes = course.quizzes
+        return render_template('course_details.html', course=course, lessons=lessons, materials=materials, quizzes=quizzes)
     
     elif current_user.role == RoleEnum.INSTRUCTOR:
         # Ensure the instructor owns the course
@@ -370,8 +371,9 @@ def course_details(course_id):
         
         lessons = course.lessons
         materials = course.materials
+        quizzes = course.quizzes
         delete_form = DeleteLessonForm()
-        return render_template('course_details.html', course=course, lessons=lessons, materials=materials, form=delete_form)
+        return render_template('course_details.html', course=course, lessons=lessons, materials=materials, quizzes=quizzes, form=delete_form)
     
     else:
         # For other roles, deny access
@@ -528,7 +530,7 @@ def manage_students():
 
 
 
-@app.route('/instructor/create_quiz', methods=['GET', 'POST'])
+@app.route('/create_quiz/<int:course_id>', methods=['GET', 'POST'])
 @login_required
 def create_quiz(course_id):
     if current_user.role != RoleEnum.INSTRUCTOR:
@@ -550,14 +552,14 @@ def create_quiz(course_id):
         flash('Quiz created successfully!', 'success')
         return redirect(url_for('instructor_dashboard'))
 
-    return render_template('create_quiz.html', form=form)
+    return render_template('create_quiz.html', form=form, course_id=course_id)
 
 
 
 
 @app.route('/quiz/<int:quiz_id>', methods=['GET', 'POST'])
 @login_required
-def take_quiz(quiz_id):
+def take_quiz(course_id, quiz_id):
     if current_user.role != RoleEnum.STUDENT:
         flash('You are not authorized to access this page.')
         return redirect(url_for('index'))
@@ -580,9 +582,9 @@ def take_quiz(quiz_id):
 
 
 
-@app.route('/instructor/view_submissions/<int:quiz_id>', methods=['GET'])
+@app.route('/instructor/view_submissions/<int:course_id>/<int:quiz_id>', methods=['GET'])
 @login_required
-def view_submissions(quiz_id):
+def view_submissions(course_id, quiz_id):
     if current_user.role != RoleEnum.INSTRUCTOR:
         flash('You are not authorized to access this page.')
         return redirect(url_for('index'))
@@ -591,7 +593,6 @@ def view_submissions(quiz_id):
     submissions = QuizSubmission.query.filter_by(quiz_id=quiz_id).all()
     
     return render_template('view_submissions.html', quiz=quiz, submissions=submissions)
-
 
 
 

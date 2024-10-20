@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
-  <div class="course-container">
+<div class="course-container">
     <h2>{{ course.title }}</h2>
     <p>{{ course.description }}</p>
     <p><strong>Instructor:</strong> {{ course.instructor.user.username }}</p>
@@ -50,5 +50,21 @@
     {% else %}
       <p class="text-muted">No materials uploaded for this course.</p>
     {% endif %}
-  </div>
+
+    <hr>
+
+    <h3>Quizzes</h3>
+    {% if current_user.is_authenticated and current_user.role == RoleEnum.INSTRUCTOR and course.instructor_id == current_user.instructor.id %}
+        <a href="{{ url_for('create_quiz', course_id=course.id) }}" class="btn btn-primary mt-3">Create Quiz</a>
+        {% for quiz in course.quizzes %}  <!-- Loop through quizzes associated with the course -->
+            <a href="{{ url_for('view_submissions', course_id=course.id, quiz_id=quiz.id) }}" class="btn btn-secondary mt-3">View Submissions for {{ quiz.title }}</a>
+        {% endfor %}
+    {% endif %}
+    
+    {% if current_user.is_authenticated and current_user.role == RoleEnum.STUDENT %}
+      {% for quiz in quizzes %}
+          <a href="{{ url_for('take_quiz', course_id=course.id, quiz_id=quiz.id) }}" class="btn btn-success mt-3">Take Quiz</a>
+      {% endfor %}
+    {% endif %}
+</div>
 {% endblock %}
