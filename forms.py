@@ -4,6 +4,7 @@ from wtforms.validators import DataRequired, EqualTo, ValidationError, Length
 from models import User
 from enum import Enum
 from flask_wtf.file import FileAllowed
+from flask import request
 
 
 class RoleEnum(Enum):
@@ -59,13 +60,26 @@ class DeleteLessonForm(FlaskForm):
 class QuestionForm(FlaskForm):
     """Form for creating a question."""
     question_text = TextAreaField('Question', validators=[DataRequired()])
+    answer = StringField('Your Answer')
     correct_answer = StringField('Correct Answer', validators=[DataRequired()])
     submit = SubmitField('Add Question')
 
 class QuizForm(FlaskForm):
-    """Form for creating a quiz."""
-    title = StringField('Quiz Title', validators=[DataRequired()])
-    status = SelectField('Quiz Status', choices=[('active', 'Active'), ('inactive', 'Inactive')], validators=[DataRequired()])
-    questions = FieldList(FormField(QuestionForm), min_entries=1)  # Add at least one question
+    title = StringField('Title', validators=[DataRequired()])
+    status = SelectField('Status', choices=[('Active', 'Active'), ('Inactive', 'Inactive')], validators=[DataRequired()])
+    questions = FieldList(FormField(QuestionForm), min_entries=1)
     submit = SubmitField('Create Quiz')
+ 
+    # Accept the extra_validators argument
+    def validate(self, extra_validators=None):
+        if request.endpoint == 'submit_quiz':  # Only validate answers when submitting the quiz
+            for question in self.questions:
+                if not question.answer.data:
+                    self.errors['questions'] = [{'answer': ['This field is required.']}]
+                    return False
+            return True
+        else:
+            # Default validation for creating/editing the quiz
+            return super(QuizForm, self).validate(extra_validators=extra_validators)
 
+    

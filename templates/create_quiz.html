@@ -24,26 +24,44 @@
 
         <div id="questions-container">
             <h4>Add Questions</h4>
-            <!-- Add multiple questions here -->
-            {% for question in form.questions %}
+            <div class="question-entry">
                 <div class="form-group">
-                    {{ question.question_text.label(class="form-label") }}
-                    {{ question.question_text(class="form-control") }}
-                    {% if question.question_text.errors %}
-                        <small class="text-danger">{{ question.question_text.errors[0] }}</small>
-                    {% endif %}
+                    <label for="question_text">Question</label>
+                    <input type="text" name="questions-0-question_text" class="form-control">
                 </div>
                 <div class="form-group">
-                    {{ question.correct_answer.label(class="form-label") }}
-                    {{ question.correct_answer(class="form-control") }}
-                    {% if question.correct_answer.errors %}
-                        <small class="text-danger">{{ question.correct_answer.errors[0] }}</small>
-                    {% endif %}
+                    <label for="correct_answer">Correct Answer</label>
+                    <input type="text" name="questions-0-correct_answer" class="form-control">
                 </div>
-            {% endfor %}
+            </div>
         </div>
 
+        <button type="button" id="add-question" class="btn btn-secondary">Add Another Question</button>
         <button type="submit" class="btn btn-primary">Create Quiz</button>
     </form>
 </div>
+
+<script>
+    let questionCount = 1;
+
+    document.getElementById('add-question').onclick = function() {
+        const container = document.getElementById('questions-container');
+        
+        const newQuestion = document.createElement('div');
+        newQuestion.classList.add('question-entry');
+        newQuestion.innerHTML = `
+            <div class="form-group">
+                <label for="question_text">Question</label>
+                <input type="text" name="questions-${questionCount}-question_text" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="correct_answer">Correct Answer</label>
+                <input type="text" name="questions-${questionCount}-correct_answer" class="form-control">
+            </div>
+        `;
+        
+        container.appendChild(newQuestion);
+        questionCount++;
+    };
+</script>
 {% endblock %}

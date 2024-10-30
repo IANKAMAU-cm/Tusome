@@ -157,3 +157,10 @@ class QuizSubmission(db.Model):
     student = db.relationship('Student', back_populates='quiz_submissions')
     quiz = db.relationship('Quiz', back_populates='quiz_submissions')
     question = db.relationship('Question', back_populates='quiz_submissions')
+
+    def auto_grade(self):
+        """Automatically grade based on correct answer."""
+        if self.question.correct_answer == self.selected_answer:
+            return 1  # 1 point for correct answer
+        else:
+            return 0  # 0 points for incorrect answer

@@ -15,22 +15,23 @@
             </tr>
         </thead>
         <tbody>
-            {% for submission in submissions %}
+            {% for student_id, student_submissions in grouped_submissions.items() %}
             <tr>
-                <td>{{ submission.student.user.username }}</td>
-                <td>{{ submission.submission_date.strftime('%Y-%m-%d') }}</td>
+                <td>{{ student_submissions[0].student.user.username }}</td>
+                <td>{{ student_submissions[0].submission_date.strftime('%Y-%m-%d') }}</td>
                 <td>
                     <ul>
-                        {% for answer in submission.answers %}
-                        <li>{{ answer.question_text }}: {{ answer.student_answer }}</li>
+                        {% for submission in student_submissions %}
+                        <li>{{ submission.question.question_text }}: {{ submission.selected_answer }}</li>
                         {% endfor %}
                     </ul>
                 </td>
-                <td>{{ submission.grade or 'Ungraded' }}</td>
+                <td>{{ student_submissions[0].grade or 'Ungraded' }}</td>
                 <td>
-                    <form method="POST" action="{{ url_for('grade_submission', submission_id=submission.id) }}">
+                    <form method="POST" action="{{ url_for('grade_submission', submission_id=student_submissions[0].id) }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                         <div class="form-group">
-                            <input type="number" name="grade" class="form-control" min="0" max="100" value="{{ submission.grade }}">
+                            <input type="number" name="grade" class="form-control" min="0" max="100" value="{{ student_submissions[0].grade }}">
                         </div>
                         <button type="submit" class="btn btn-success">Assign Grade</button>
                     </form>

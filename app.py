@@ -10,10 +10,12 @@ from werkzeug.utils import secure_filename
 import os
 from enum import Enum
 from models import RoleEnum
-from flask_wtf import CSRFProtect
+from flask_wtf.csrf import CSRFProtect
 from slugify import slugify
 from datetime import datetime
 import re
+from flask_wtf import CSRFProtect
+from collections import defaultdict
 
 # Initialize the app
 app = Flask(__name__)
@@ -538,15 +540,23 @@ def create_quiz(course_id):
         return redirect(url_for('index'))
 
     form = QuizForm()
+    
     if form.validate_on_submit():
-        quiz = Quiz(title=form.title.data, status=form.status.data, course_id=course_id)  # Pass appropriate course ID
+        # Create the quiz object
+        quiz = Quiz(title=form.title.data, status=form.status.data, course_id=course_id)
         db.session.add(quiz)
         db.session.commit()
 
         # Add questions to the quiz
-        for q in form.questions.data:
-            question = Question(question_text=q['question_text'], correct_answer=q['correct_answer'], quiz_id=quiz.id)
-            db.session.add(question)
+        for question in form.questions:
+            # Ensure that each question has valid data
+            question_data = question.data
+            question_model = Question(
+                question_text=question_data['question_text'],
+                correct_answer=question_data['correct_answer'],
+                quiz_id=quiz.id
+            )
+            db.session.add(question_model)
 
         db.session.commit()
         flash('Quiz created successfully!', 'success')
@@ -555,32 +565,94 @@ def create_quiz(course_id):
     return render_template('create_quiz.html', form=form, course_id=course_id)
 
 
-
-
-@app.route('/quiz/<int:quiz_id>', methods=['GET', 'POST'])
+@app.route('/course/<int:course_id>/quiz/<int:quiz_id>', methods=['GET', 'POST'])
 @login_required
 def take_quiz(course_id, quiz_id):
     if current_user.role != RoleEnum.STUDENT:
         flash('You are not authorized to access this page.')
         return redirect(url_for('index'))
 
+    course = Course.query.get_or_404(course_id)
     quiz = Quiz.query.get_or_404(quiz_id)
-    form = EnrollCourseForm()  # Or a specific form for quiz submission
 
-    if form.validate_on_submit():
+    # Initialize the quiz form
+    form = QuizForm()
+
+    if request.method == 'GET':
+        # Clear the form.questions before appending to avoid duplicates
+        form.questions.entries.clear()
+
+        # Append questions to the form
         for question in quiz.questions:
-            selected_answer = request.form.get(f'question_{question.id}')
-            submission = QuizSubmission(student_id=current_user.id, quiz_id=quiz.id, question_id=question.id, selected_answer=selected_answer)
+            question_form = QuestionForm()
+            question_form.question_text.data = question.question_text  # This should set the correct question text
+            form.questions.append_entry(question_form)
+
+    # Handle form submission
+    if form.validate_on_submit():
+        # Process the submitted answers
+        for idx, question_form in enumerate(form.questions):
+            selected_answer = question_form.answer.data
+            question = quiz.questions[idx]
+
+            # Save the student's submission
+            submission = QuizSubmission(
+                student_id=current_user.id,
+                quiz_id=quiz.id,
+                question_id=question.id,
+                selected_answer=selected_answer
+            )
             db.session.add(submission)
 
         db.session.commit()
         flash('Quiz submitted successfully!', 'success')
         return redirect(url_for('student_dashboard'))
 
-    return render_template('take_quiz.html', quiz=quiz, form=form)
+    return render_template('take_quiz.html', course=course, quiz=quiz, form=form)
 
+@app.route('/course/<int:course_id>/quiz/<int:quiz_id>/submit', methods=['POST'])
+@login_required
+def submit_quiz(course_id, quiz_id):
+    """Handles quiz submission."""
+    # Get the quiz by quiz_id
+    quiz = Quiz.query.get_or_404(quiz_id)
+    course = Course.query.get_or_404(course_id)
+    form = QuizForm(request.form)
 
+    if form.validate_on_submit():
+        for idx, question_form in enumerate(form.questions):
+            selected_answer = question_form.answer.data
+            question = quiz.questions[idx]
 
+            # Check for existing submission before adding a new one
+            existing_submission = QuizSubmission.query.filter_by(
+                student_id=current_user.id,
+                quiz_id=quiz.id,
+                question_id=question.id
+            ).first()
+
+            if not existing_submission:
+                # Save the student's submission if it doesn't already exist
+                submission = QuizSubmission(
+                    student_id=current_user.id,
+                    quiz_id=quiz.id,
+                    question_id=question.id,
+                    selected_answer=selected_answer
+                )
+                db.session.add(submission)
+
+        db.session.commit()
+        
+        flash("Quiz submitted successfully!", "success")
+        return redirect(url_for('course_details', course_id=course_id))
+
+    if not form.validate_on_submit():
+        print(f"Form data: {request.form}")
+        for field, errors in form.errors.items():
+            print(f"Error in the {field} field - {errors}")
+        flash("There was an error with your submission. Please try again.", "danger")
+    flash("There was an error with your submission. Please try again.", "danger")
+    return render_template('take_quiz.html', course=course, quiz=quiz, form=form)
 
 @app.route('/instructor/view_submissions/<int:course_id>/<int:quiz_id>', methods=['GET'])
 @login_required
@@ -590,11 +662,29 @@ def view_submissions(course_id, quiz_id):
         return redirect(url_for('index'))
 
     quiz = Quiz.query.get_or_404(quiz_id)
+
+    # Retrieve all submissions for this quiz and group them by student
     submissions = QuizSubmission.query.filter_by(quiz_id=quiz_id).all()
+
+    grouped_submissions = defaultdict(list)
+    for submission in submissions:
+        grouped_submissions[submission.student_id].append(submission)
+
+    # Pass the grouped submissions to the template
+    return render_template('view_submissions.html', quiz=quiz, grouped_submissions=grouped_submissions)
+
+@app.route('/grade_submission/<int:submission_id>', methods=['POST'])
+@login_required
+def grade_submission(submission_id):
+    submission = QuizSubmission.query.get_or_404(submission_id)
+    grade = request.form.get('grade')
     
-    return render_template('view_submissions.html', quiz=quiz, submissions=submissions)
+    # Update the grade
+    submission.grade = grade
+    db.session.commit()
 
-
+    flash('Grade assigned successfully!')
+    return redirect(url_for('view_submissions', course_id=submission.quiz.course_id, quiz_id=submission.quiz_id))
 
 @app.route('/grading')
 def grading():

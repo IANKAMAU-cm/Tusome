@@ -3,16 +3,22 @@
 {% block content %}
 <div class="container mt-5">
     <h2>{{ quiz.title }}</h2>
-    <form method="POST" action="{{ url_for('submit_quiz', quiz_id=quiz.id) }}">
+    <form method="POST" action="{{ url_for('submit_quiz', course_id=course.id, quiz_id=quiz.id) }}">
         {{ form.hidden_tag() }}
 
-        {% for question in form.questions %}
+        <!-- Loop through the questions and render each one -->
+        {% for question_form in form.questions %}
             <div class="form-group">
-                <h4>{{ question.question_text.label }}</h4>
-                {{ question.answer.label(class="form-label") }}
-                {{ question.answer(class="form-control") }}
-                {% if question.answer.errors %}
-                    <small class="text-danger">{{ question.answer.errors[0] }}</small>
+                <!-- Display the question text properly -->
+                <h4>{{ question_form.question_text.data }}</h4>
+
+                <!-- Display the answer input field -->
+                {{ question_form.answer.label(class="form-label") }}
+                {{ question_form.answer(class="form-control") }}
+
+                <!-- Display validation errors, if any -->
+                {% if question_form.answer.errors %}
+                    <small class="text-danger">{{ question_form.answer.errors[0] }}</small>
                 {% endif %}
             </div>
         {% endfor %}
