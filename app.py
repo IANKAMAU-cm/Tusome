@@ -533,19 +533,30 @@ def view_course_materials(course_id):
 @app.route('/instructor/manage_students')
 @login_required
 def manage_students():
-    # Fetch all students with their enrollments and related courses
+    # Fetch all students
     students = db.session.query(Student).all()
 
-    # Prepare a list of students with their enrolled courses
-    student_courses = []
+    # Prepare a list of students with their enrolled courses and taken quizzes
+    student_courses_quizzes = []
     for student in students:
-        courses = [enrollment.course.title for enrollment in student.enrollments]  # Fetch course titles
-        student_courses.append({
+        # Fetch the titles of the courses the student is enrolled in
+        courses = [enrollment.course.title for enrollment in student.enrollments]
+
+        # Use a dictionary to store only the first quiz submission per quiz
+        quiz_dict = {}
+        for quiz_submission in student.quiz_submissions:
+            quiz = quiz_submission.quiz
+            if quiz.id not in quiz_dict:
+                quiz_dict[quiz.id] = (quiz.title, quiz_submission.grade)
+
+        # Append student data to the list
+        student_courses_quizzes.append({
             'student': student,
-            'courses': courses
+            'courses': courses,
+            'quizzes': list(quiz_dict.values())  # Convert dictionary back to list
         })
 
-    return render_template('manage_students.html', student_courses=student_courses)
+    return render_template('manage_students.html', student_courses_quizzes=student_courses_quizzes)
 
 @app.route('/create_quiz/<int:course_id>', methods=['GET', 'POST'])
 @login_required

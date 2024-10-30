@@ -5,19 +5,31 @@
 <table class="table table-bordered">
     <thead>
         <tr>
-            <th>Student Name</th>
+            <th>Student</th>
             <th>Courses Enrolled</th>
+            <th>Quizzes Taken</th>
         </tr>
     </thead>
     <tbody>
-        {% for entry in student_courses %}
+        {% for entry in student_courses_quizzes %}
         <tr>
             <td>{{ entry.student.user.username }}</td>
             <td>
                 {% if entry.courses %}
-                    {{ ', '.join(entry.courses) }}
+                    {% for course in entry.courses %}
+                        {{ course }}<br>
+                    {% endfor %}
                 {% else %}
                     No courses enrolled
+                {% endif %}
+            </td>
+            <td>
+                {% if entry.quizzes %}
+                    {% for quiz, score in entry.quizzes %}
+                        {{ quiz }} - Score: {{ score }}<br>
+                    {% endfor %}
+                {% else %}
+                    No quizzes taken
                 {% endif %}
             </td>
         </tr>
