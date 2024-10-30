@@ -4,18 +4,6 @@
 <div class="container">
     <h2 class="my-4">View Courses</h2>
 
-    <!-- Flash messages for notifications -->
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        <div class="alert alert-dismissible">
-          {% for category, message in messages %}
-            <div class="alert alert-{{ category }}">
-              {{ message }}
-            </div>
-          {% endfor %}
-        </div>
-      {% endif %}
-    {% endwith %}
 
     <!-- Courses Table -->
     <table class="table table-striped">
