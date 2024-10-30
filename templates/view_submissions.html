@@ -26,7 +26,13 @@
                         {% endfor %}
                     </ul>
                 </td>
-                <td>{{ student_submissions[0].grade or 'Ungraded' }}</td>
+                <td>
+                    {% if student_submissions[0].grade is not none %}
+                        {{ student_submissions[0].grade }}
+                    {% else %}
+                        Ungraded
+                    {% endif %}
+                </td>
                 <td>
                     <form method="POST" action="{{ url_for('grade_submission', submission_id=student_submissions[0].id) }}">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">

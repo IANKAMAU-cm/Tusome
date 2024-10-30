@@ -613,11 +613,13 @@ def take_quiz(course_id, quiz_id):
 @app.route('/course/<int:course_id>/quiz/<int:quiz_id>/submit', methods=['POST'])
 @login_required
 def submit_quiz(course_id, quiz_id):
-    """Handles quiz submission."""
+    """Handles quiz submission and automatic grading."""
     # Get the quiz by quiz_id
     quiz = Quiz.query.get_or_404(quiz_id)
     course = Course.query.get_or_404(course_id)
     form = QuizForm(request.form)
+
+    total_grade = 0  # Initialize total grade
 
     if form.validate_on_submit():
         for idx, question_form in enumerate(form.questions):
@@ -639,11 +641,19 @@ def submit_quiz(course_id, quiz_id):
                     question_id=question.id,
                     selected_answer=selected_answer
                 )
+
+                # Automatic grading: Compare the selected answer with the correct answer
+                if question.correct_answer == selected_answer:
+                    submission.grade = 1  # 1 point for correct answer
+                    total_grade += 1  # Add to total grade
+                else:
+                    submission.grade = 0  # 0 points for incorrect answer
+
                 db.session.add(submission)
 
         db.session.commit()
-        
-        flash("Quiz submitted successfully!", "success")
+
+        flash(f"Quiz submitted successfully! Your total score: {total_grade}/{len(quiz.questions)}", "success")
         return redirect(url_for('course_details', course_id=course_id))
 
     if not form.validate_on_submit():
@@ -651,7 +661,7 @@ def submit_quiz(course_id, quiz_id):
         for field, errors in form.errors.items():
             print(f"Error in the {field} field - {errors}")
         flash("There was an error with your submission. Please try again.", "danger")
-    flash("There was an error with your submission. Please try again.", "danger")
+
     return render_template('take_quiz.html', course=course, quiz=quiz, form=form)
 
 @app.route('/instructor/view_submissions/<int:course_id>/<int:quiz_id>', methods=['GET'])
@@ -676,14 +686,19 @@ def view_submissions(course_id, quiz_id):
 @app.route('/grade_submission/<int:submission_id>', methods=['POST'])
 @login_required
 def grade_submission(submission_id):
+    """Handles manual grading for quiz submissions."""
     submission = QuizSubmission.query.get_or_404(submission_id)
     grade = request.form.get('grade')
-    
-    # Update the grade
-    submission.grade = grade
-    db.session.commit()
 
-    flash('Grade assigned successfully!')
+    if grade.isdigit():  # Ensure the grade is a valid number
+        submission.grade = int(grade)
+        db.session.commit()
+
+        flash('Grade assigned successfully!', 'success')
+    else:
+        flash('Invalid grade input. Please enter a number.', 'danger')
+
+    # Pass both course_id and quiz_id to the redirect URL
     return redirect(url_for('view_submissions', course_id=submission.quiz.course_id, quiz_id=submission.quiz_id))
 
 @app.route('/grading')

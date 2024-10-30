@@ -152,6 +152,7 @@ class QuizSubmission(db.Model):
     question_id = db.Column(db.Integer, db.ForeignKey('question.id'), nullable=False)
     selected_answer = db.Column(db.String(200), nullable=False)
     submission_date = db.Column(db.DateTime, default=datetime.utcnow)
+    grade = db.Column(db.String(10))
 
     # Relationships
     student = db.relationship('Student', back_populates='quiz_submissions')
