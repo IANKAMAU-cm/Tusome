@@ -523,14 +523,29 @@ def view_course_materials(course_id):
 
 
 
-@app.route('/manage_students')
-@role_required(RoleEnum.ADMIN)
+#@app.route('/manage_students')
+#@role_required(RoleEnum.ADMIN)
+#def manage_students():
+    #"""Admin manage students route."""
+    #students = Student.query.all()
+    #return render_template('manage_students.html', students=students)
+
+@app.route('/instructor/manage_students')
+@login_required
 def manage_students():
-    """Admin manage students route."""
-    students = Student.query.all()
-    return render_template('manage_students.html', students=students)
+    # Fetch all students with their enrollments and related courses
+    students = db.session.query(Student).all()
 
+    # Prepare a list of students with their enrolled courses
+    student_courses = []
+    for student in students:
+        courses = [enrollment.course.title for enrollment in student.enrollments]  # Fetch course titles
+        student_courses.append({
+            'student': student,
+            'courses': courses
+        })
 
+    return render_template('manage_students.html', student_courses=student_courses)
 
 @app.route('/create_quiz/<int:course_id>', methods=['GET', 'POST'])
 @login_required

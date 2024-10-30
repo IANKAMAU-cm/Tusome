@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Manage Students</h2>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Student Name</th>
+            <th>Courses Enrolled</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for entry in student_courses %}
+        <tr>
+            <td>{{ entry.student.user.username }}</td>
+            <td>
+                {% if entry.courses %}
+                    {{ ', '.join(entry.courses) }}
+                {% else %}
+                    No courses enrolled
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}
