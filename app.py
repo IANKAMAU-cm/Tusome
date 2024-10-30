@@ -601,6 +601,12 @@ def take_quiz(course_id, quiz_id):
     course = Course.query.get_or_404(course_id)
     quiz = Quiz.query.get_or_404(quiz_id)
 
+    # Check if the student has already taken this quiz
+    existing_submission = QuizSubmission.query.filter_by(student_id=current_user.id, quiz_id=quiz.id).first()
+    if existing_submission:
+        flash('You have already taken this quiz and cannot retake it.', 'warning')
+        return redirect(url_for('student_dashboard'))  # Redirect to a relevant page
+
     # Initialize the quiz form
     form = QuizForm()
 
