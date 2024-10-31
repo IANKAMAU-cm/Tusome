@@ -3,8 +3,8 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from extensions import db  # Import db from extensions (correct place)
-from models import User, Course, CourseMaterial, Submission, Enrollment, Student, Quiz, RoleEnum, Instructor, Lesson, Question, QuizSubmission  # Import your models
-from forms import RegistrationForm, LoginForm, CourseForm, EnrollCourseForm, UploadMaterialForm, LessonForm, DeleteLessonForm, QuestionForm, QuizForm
+from models import User, Course, CourseMaterial, Submission, Enrollment, Student, Quiz, RoleEnum, Instructor, Lesson, Question, QuizSubmission, Notice  # Import your models
+from forms import RegistrationForm, LoginForm, CourseForm, EnrollCourseForm, UploadMaterialForm, LessonForm, DeleteLessonForm, QuestionForm, QuizForm, NoticeForm
 from functools import wraps
 from werkzeug.utils import secure_filename
 import os
@@ -90,6 +90,7 @@ def admin_login():
             flash('Invalid username or password', 'danger')
     return render_template('admin_login.html', form=form)
 
+#registration route
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     """User registration route."""
@@ -120,6 +121,8 @@ def register():
         flash('Your account has been created! You can now log in.', 'success')
         return redirect(url_for('login'))
     return render_template('register.html', form=form)
+
+#login route
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     """User login route."""
@@ -312,6 +315,7 @@ def browse_courses():
 
     return render_template('browse_courses.html', courses=available_courses, form=form)
 
+#route to enroll in a course
 @app.route('/enroll/<int:course_id>', methods=['POST'])
 @role_required(RoleEnum.STUDENT)
 def enroll(course_id):
@@ -732,6 +736,41 @@ def grade_submission(submission_id):
 
     # Pass both course_id and quiz_id to the redirect URL
     return redirect(url_for('view_submissions', course_id=submission.quiz.course_id, quiz_id=submission.quiz_id))
+
+
+
+@app.route('/instructor/post_notice', methods=['GET', 'POST'])
+@login_required
+def post_notice():
+    if current_user.role != RoleEnum.INSTRUCTOR:
+        flash('You are not authorized to post notices.', 'danger')
+        return redirect(url_for('index'))
+
+    form = NoticeForm()  # We'll create this form next
+    if form.validate_on_submit():
+        notice = Notice(
+            title=form.title.data,
+            content=form.content.data,
+            instructor_id=current_user.id
+        )
+        db.session.add(notice)
+        db.session.commit()
+        flash('Notice posted successfully!', 'success')
+        return redirect(url_for('instructor_dashboard'))  # Redirect back to instructor dashboard
+
+    return render_template('post_notice.html', form=form)
+
+
+@app.route('/student/notices')
+@login_required
+def view_notices():
+    if current_user.role != RoleEnum.STUDENT:
+        flash('You are not authorized to view this page.', 'danger')
+        return redirect(url_for('index'))
+
+    notices = Notice.query.order_by(Notice.date_posted.desc()).all()  # Fetch all notices
+    return render_template('view_notices.html', notices=notices)
+
 
 @app.route('/grading')
 def grading():

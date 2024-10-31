@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>Notices</h2>
+
+    <!-- Loop through the notices and display each one -->
+    <div class="list-group">
+        {% for notice in notices %}
+            <a href="#" class="list-group-item list-group-item-action" data-bs-toggle="modal" data-bs-target="#noticeModal-{{ notice.id }}">
+                <h5>{{ notice.title }}</h5>
+                <small>Posted on {{ notice.date_posted.strftime('%Y-%m-%d') }}</small>
+            </a>
+
+            <!-- Modal for each notice -->
+            <div class="modal fade" id="noticeModal-{{ notice.id }}" tabindex="-1" aria-labelledby="noticeModalLabel-{{ notice.id }}" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="noticeModalLabel-{{ notice.id }}">{{ notice.title }}</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            {{ notice.content }}
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

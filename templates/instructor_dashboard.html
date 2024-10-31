@@ -38,12 +38,18 @@
                         </a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('post_notice') }}">
+                            Post a Notice
+                        </a>
+                    </li>
+                    <!--
+                    <li class="nav-item">
                         {% if current_user.role == RoleEnum.INSTRUCTOR %}
                         <a class="nav-link" href="{{ url_for('upload_material') }}">
                             Upload Course Materials
                         </a>
                         {% endif %}
-                    </li>
+                    </li>-->
                 </ul>
             </div>
         </nav>

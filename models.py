@@ -165,3 +165,13 @@ class QuizSubmission(db.Model):
             return 1  # 1 point for correct answer
         else:
             return 0  # 0 points for incorrect answer
+
+class Notice(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(255), nullable=False)
+    content = db.Column(db.Text, nullable=False)
+    date_posted = db.Column(db.DateTime, default=datetime.utcnow)
+    instructor_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)  # Assuming instructors are in the User model
+
+    def __repr__(self):
+        return f"<Notice {self.title}>"

@@ -82,4 +82,8 @@ class QuizForm(FlaskForm):
             # Default validation for creating/editing the quiz
             return super(QuizForm, self).validate(extra_validators=extra_validators)
 
-    
+
+class NoticeForm(FlaskForm):
+    title = StringField('Title', validators=[DataRequired()])
+    content = TextAreaField('Content', validators=[DataRequired()])
+    submit = SubmitField('Post Notice')
